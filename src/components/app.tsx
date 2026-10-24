@@ -18,9 +18,12 @@ import {
 } from "./employer";
 import { Empty } from "./ui";
 import { useApp } from "./provider";
+import { AdminDashboard } from "./admin";
 export function App() {
   const path = usePathname();
   const { t } = useApp();
+  if (path === "/admin" || path.startsWith("/admin/"))
+    return <AdminDashboard />;
   if (path === "/") return <Home />;
   if (path === "/jobs") return <Jobs />;
   if (path === "/jobs/near-me") return <Jobs near />;

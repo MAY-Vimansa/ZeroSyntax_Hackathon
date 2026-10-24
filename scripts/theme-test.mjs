@@ -1,6 +1,7 @@
 import { chromium, expect as baseExpect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { mkdir, writeFile } from "node:fs/promises";
+import { completeTestCaptcha } from "./captcha-test-helpers.mjs";
 const expect = baseExpect.configure({ timeout: 20000 });
 const base = process.env.TEST_APP_URL ?? "http://127.0.0.1:3000";
 if (!["127.0.0.1", "localhost"].includes(new URL(base).hostname))
@@ -144,6 +145,7 @@ try {
   await ready(page, "/login");
   await page.getByLabel("Email address").fill("employer@flexirova.example");
   await page.getByLabel("Password", { exact: true }).fill("FlexiRova!2026");
+  await completeTestCaptcha(page);
   await page.getByRole("button", { name: "Log in", exact: true }).click();
   await page.waitForURL("**/employer");
   for (const mode of ["light", "dark"]) {
@@ -173,6 +175,7 @@ try {
   await ready(wp, "/login");
   await wp.getByLabel("Email address").fill("worker@flexirova.example");
   await wp.getByLabel("Password", { exact: true }).fill("FlexiRova!2026");
+  await completeTestCaptcha(wp);
   await wp.getByRole("button", { name: "Log in", exact: true }).click();
   await wp.waitForURL("**/applications");
   for (const mode of ["light", "dark"]) {

@@ -13,6 +13,11 @@
     "test:integration": "node scripts/integration.mjs",
     "test:browser": "node scripts/browser-test.mjs",
     "test:themes": "node scripts/theme-test.mjs",
+    "test:ai": "node scripts/ai-browser-test.mjs",
+    "test:captcha": "node scripts/captcha-test.mjs",
+    "test:accounts": "node scripts/account-flow-test.mjs",
+    "test:admin": "node scripts/admin-test.mjs",
+    "seed:admin": "node scripts/seed-admin.mjs",
     "db:start": "supabase start -x realtime,storage-api,imgproxy,edge-runtime,logflare,vector,supavisor",
     "db:stop": "supabase stop",
     "seed": "node scripts/seed.mjs",
@@ -20,6 +25,7 @@
     "format": "prettier --write src scripts tests *.json *.ts *.mjs docs/*.md README.md"
   },
   "dependencies": {
+    "@hcaptcha/react-hcaptcha": "^2.2.0",
     "@hookform/resolvers": "^5.2.0",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.90.0",

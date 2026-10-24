@@ -1,5 +1,6 @@
 import { db } from "@/lib/supabase/server";
 import { ok } from "@/lib/http";
+import { aiStatus } from "@/lib/ai";
 export async function GET() {
   let database = false;
   try {
@@ -9,5 +10,11 @@ export async function GET() {
       .select("id", { head: true, count: "exact" });
     database = !error;
   } catch {}
-  return ok({ database, ai: false, aiStatus: "not_configured" });
+  const ai = aiStatus();
+  return ok({
+    database,
+    ai: ai.status === "ready",
+    aiConfigured: ai.configured,
+    aiStatus: ai.status,
+  });
 }

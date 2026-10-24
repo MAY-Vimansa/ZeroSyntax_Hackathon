@@ -32,6 +32,7 @@ export const companySchema = z.object({
   name: z.string().trim().min(2).max(120),
   description: z.string().max(2000),
   contact_email: z.email(),
+  address: z.string().trim().max(500).optional(),
   city: z.string().trim().min(1).max(80),
   district: z.enum(districts),
 });

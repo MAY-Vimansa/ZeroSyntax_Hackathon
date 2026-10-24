@@ -25,4 +25,7 @@ try {
 execFileSync(cli, ["migration", "up", "--local"], { stdio: "inherit" });
 await import("./configure-local.mjs");
 execFileSync(process.execPath, ["scripts/seed.mjs"], { stdio: "inherit" });
+execFileSync(process.execPath, ["scripts/seed-admin.mjs"], {
+  stdio: "inherit",
+});
 console.log("Ready. Run npm run dev, then open http://127.0.0.1:3000.");

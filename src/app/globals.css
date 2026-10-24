@@ -1,5 +1,61 @@
 @import "tailwindcss";
 
+.assistant-toolbar,
+.assistant-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.assistant-toolbar .chip { display: inline-flex; align-items: center; gap: 8px; }
+.assistant-conversation { display: grid; gap: 20px; margin: 24px 0; }
+.assistant-welcome { text-align: center; padding: 36px 24px; }
+.assistant-welcome > svg { color: var(--red); }
+.assistant-turn { padding: 22px; border: 1px solid var(--border); border-radius: 16px; min-width: 0; background: var(--surface); }
+.assistant-turn.user { margin-left: min(10%, 80px); border-left: 3px solid var(--red); }
+.assistant-message { white-space: pre-wrap; overflow-wrap: anywhere; margin: 10px 0; }
+.assistant-jobs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 20px; }
+.assistant-jobs .job-card { height: auto; }
+.assistant-composer { display: grid; gap: 12px; }
+.assistant-composer textarea { width: 100%; resize: vertical; }
+.assistant-thinking { display: flex; align-items: center; gap: 10px; }
+.assistant-error { padding: 16px; border: 1px solid var(--red); border-radius: 10px; overflow-wrap: anywhere; }
+.ai-skill-extractor { padding: 12px 0; }
+@media (max-width: 700px) {
+  .assistant-jobs { grid-template-columns: minmax(0, 1fr); }
+  .assistant-turn { padding: 16px; }
+  .assistant-actions > button { flex: 1 1 160px; white-space: normal; }
+}
+
+.verification-panel {
+  margin: 22px 0;
+  padding: 23px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-alt);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 13px;
+}
+.verification-panel h3 {
+  font-size: 21px;
+}
+.verification-panel > .muted {
+  font-size: 12px;
+}
+.verification-address {
+  font-size: 13px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+.auth-form .verification-panel .button {
+  margin: 0;
+  min-height: 46px;
+}
+.verification-panel .text-button {
+  padding: 0;
+}
+.auth-form > .notice {
+  margin-bottom: 18px;
+}
+
 @media (max-width: 700px) {
   .header-controls .theme-toggle {
     display: inline-flex;
@@ -1723,6 +1779,91 @@ form label + label {
 }
 .auth-form h2 {
   font-size: 29px;
+}
+.auth-captcha {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  margin-top: 22px;
+  width: 100%;
+}
+.captcha-preview {
+  width: 100%;
+  border: 1px solid var(--input-border);
+  border-radius: 12px;
+  background: var(--surface-alt);
+  overflow: hidden;
+}
+.captcha-preview-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 16px;
+}
+.auth-form .captcha-preview-check {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 11px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.captcha-preview-check input {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--action);
+  cursor: pointer;
+}
+.captcha-preview-brand {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  color: var(--muted);
+  font-size: 10px;
+  flex-shrink: 0;
+}
+.captcha-preview-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 14px 16px;
+  background: var(--info-bg);
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+.captcha-preview-notice > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--info);
+}
+.captcha-preview-notice strong {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+}
+.captcha-preview-links {
+  padding: 11px 16px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.6;
+}
+.captcha-preview-links a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.auth-captcha small {
+  font-size: 11px;
+  line-height: 1.5;
 }
 .auth-form .button {
   width: 100%;

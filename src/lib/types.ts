@@ -52,6 +52,7 @@ export type Company = {
   name: string;
   description: string;
   contact_email: string;
+  address: string;
   city: string;
   district: string;
   verification_status: string;

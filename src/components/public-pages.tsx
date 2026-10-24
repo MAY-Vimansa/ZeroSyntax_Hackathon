@@ -11,7 +11,6 @@ import {
   ShieldCheck,
   Navigation,
   SlidersHorizontal,
-  Sparkles,
   BriefcaseBusiness,
   Users,
   ChevronLeft,
@@ -549,33 +548,7 @@ export function EmployersLanding() {
   );
 }
 const BuildingIcon = BriefcaseBusiness;
-export function Assistant() {
-  const { t } = useApp();
-  return (
-    <div className="container page assistant-page">
-      <PageHeading eyebrow={t("assistant")} title={t("aiTitle")} />
-      <section className="assistant-off">
-        <span className="assistant-emblem">
-          <Sparkles size={35} />
-        </span>
-        <span className="chip">{t("aiOff")}</span>
-        <h2>{t("aiLater")}</h2>
-        <p>{t("aiBody")}</p>
-        <p className="muted small-text">{t("aiLanguage")}</p>
-        <div className="hero-buttons">
-          <Link className="button" href="/jobs">
-            {t("jobs")}
-            <ArrowRight size={18} />
-          </Link>
-          <Link className="button secondary" href="/jobs/near-me">
-            <MapPin size={18} />
-            {t("near")}
-          </Link>
-        </div>
-      </section>
-    </div>
-  );
-}
+export { Assistant } from "./assistant";
 export function Privacy() {
   const { t } = useApp();
   return (

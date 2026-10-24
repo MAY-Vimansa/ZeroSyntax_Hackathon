@@ -9,7 +9,24 @@ export async function GET(req: Request) {
   if (code) {
     const client = await db();
     const { error } = await client.auth.exchangeCodeForSession(code);
-    if (!error) return NextResponse.redirect(new URL("/profile", origin));
+    if (!error) {
+      const {
+        data: { user },
+      } = await client.auth.getUser();
+      const { data: profile } = user
+        ? await client
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single()
+        : { data: null };
+      return NextResponse.redirect(
+        new URL(
+          profile?.role === "EMPLOYER" ? "/employer/company" : "/profile",
+          origin,
+        ),
+      );
+    }
   }
-  return NextResponse.redirect(new URL("/login?error=verification", origin));
+  return NextResponse.redirect(new URL("/login?verification=sign-in", origin));
 }

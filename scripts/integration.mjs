@@ -2,6 +2,7 @@ import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 import assert from "node:assert/strict";
+import { localCaptchaOptions } from "./captcha-test-helpers.mjs";
 config({ path: ".env.local", quiet: true });
 const base = process.env.TEST_APP_URL ?? "http://127.0.0.1:3000";
 if (!["127.0.0.1", "localhost"].includes(new URL(base).hostname))
@@ -29,7 +30,11 @@ async function session(email) {
     },
   });
   check(
-    await client.auth.signInWithPassword({ email, password: "FlexiRova!2026" }),
+    await client.auth.signInWithPassword({
+      email,
+      password: "FlexiRova!2026",
+      options: localCaptchaOptions(),
+    }),
   );
   return {
     client,
@@ -96,9 +101,11 @@ try {
         body: { message: "packing" },
       })
     ).error.code,
-    "AI_NOT_CONFIGURED",
+    "SIGN_IN_REQUIRED",
   );
-  pass("AI explicitly unavailable without any model service");
+  assert.equal((await request("/api/ai/chat", { method: "POST", session: worker, body: { message: "" } })).status, 422);
+  assert.equal((await request("/api/ai/extract-skills", { method: "POST", session: employer, body: { text: "packing" } })).status, 403);
+  pass("AI requires authentication, validates input, and restricts worker skill extraction");
   assert.equal(
     (await request("/api/jobs", { method: "POST", session: worker, body: {} }))
       .status,

@@ -212,10 +212,12 @@ token_verifications = 30
 web3 = 30
 
 # Configure one of the supported captcha providers: `hcaptcha`, `turnstile`.
-# [auth.captcha]
-# enabled = true
-# provider = "hcaptcha"
-# secret = ""
+[auth.captcha]
+enabled = true
+provider = "hcaptcha"
+# Official hCaptcha test secret, for this isolated local stack only.
+# Hosted projects must enable CAPTCHA with a real secret in Supabase Auth settings.
+secret = "0x0000000000000000000000000000000000000000"
 
 [auth.email]
 # Allow/disallow new user signups via email to your project.

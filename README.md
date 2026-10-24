@@ -14,7 +14,7 @@
 
 ![FlexiRova desktop homepage with job discovery and nearby work](docs/screenshots/home-desktop.png)
 
-> **Hackathon build:** a working local application with database-backed search, authentication, job publishing, applications, and employer decisions. All demo jobs, businesses, and accounts are fictional. Public hosting and AI integration are not included in this release.
+> **Hackathon build:** a working local application with database-backed search, authentication, job publishing, applications, and employer decisions. All demo jobs, businesses, and accounts are fictional. OpenAI job-search interpretation and skill extraction are implemented; the current API project needs credits before live AI answers can be verified. Public hosting is not configured.
 
 ## The problem
 
@@ -49,6 +49,13 @@ FlexiRova brings those decisions into one workflow:
 - **Control the listing lifecycle:** create, edit, save as draft, publish, and close.
 - **Review applicants** and record approval or rejection.
 - **Protect shift capacity:** database transactions and row locking prevent concurrent approvals from exceeding available places.
+
+### For administrators
+
+- A protected [admin workspace](docs/ADMIN.md) with real platform metrics, registration trends, and application status distribution.
+- Searchable users, companies, job listings, and applications; filtered CSV exports.
+- Company verification and job closure with required review notes and a transactionally recorded audit trail.
+- Responsive light/dark layouts. Local demo access: `admin@flexirova.example` / `FlexiRova!2026` after `npm.cmd run seed:admin` and the admin migration.
 
 ### Across the experience
 
@@ -104,7 +111,7 @@ npm.cmd run setup:local
 
 The setup script starts the isolated `flexirova` Supabase stack, applies SQL migrations, writes local settings to ignored `.env.local`, and seeds fictional accounts and shifts. The first run downloads container images.
 
-**No AI model, AI API key, or hosted Supabase project is needed for this demo.**
+**Ordinary job search needs no AI key or hosted Supabase project.** The optional AI features require server-only OpenAI configuration and API credits; see [AI integration and current validation](docs/AI.md).
 
 ### 3. Start the application
 
@@ -130,7 +137,19 @@ Stop the application with **Ctrl+C**. Stop the project's database stack with `np
 | Worker   | `worker@flexirova.example`   | `FlexiRova!2026` |
 | Employer | `employer@flexirova.example` | `FlexiRova!2026` |
 
-These are fictional, preconfirmed accounts for the local demo only. Newly registered accounts require email verification. Messages appear in the **local verification inbox**, rather than being delivered to external mailboxes. Open the confirmation link in the same browser used to register.
+These are fictional, preconfirmed accounts for the local demo only. Newly registered accounts require email verification. Messages appear in the **local verification inbox**, rather than being delivered to Gmail, Outlook, or other external mailboxes. Registration now shows a dedicated verification step with a direct inbox link. An unverified login offers the same recovery step and a CAPTCHA-protected resend action; existing accounts do not need to be recreated. If a confirmation link is opened in a different browser, follow the sign-in continuation and use your password, or request a fresh link if the account is still unconfirmed. Successful employer verification opens company onboarding; subsequent login uses the stored profile role.
+
+### Registration CAPTCHA
+
+Worker and employer registration use an hCaptcha checkbox, verified by Supabase Auth. Password login also requires it because Supabase enables CAPTCHA across its authentication endpoints. Verification resets after each request, failure, expiry, or form context change. A blocked or unavailable widget prevents submission.
+
+The local stack uses hCaptcha's **official test keys**, with a visible test-mode label. They exercise the checkbox and server verification but provide **no real bot protection**. `setup:local` writes the public test sitekey to `NEXT_PUBLIC_HCAPTCHA_SITEKEY`; `supabase/config.toml` enables its matching public test secret. Existing installations need to restart their FlexiRova Supabase stack after this configuration change and add the sitekey from `.env.example` to `.env.local`. The widget needs internet access.
+
+For the local test key, a styled checkbox card triggers hCaptcha's supported invisible mode and waits for its actual test token. The card presents the testing notice and site-administrator guidance in a readable information panel, with hCaptcha privacy/terms links. This replaces the cramped red message inside the default test widget. Real sitekeys continue to use the standard hCaptcha widget.
+
+Before a real-user deployment, create an hCaptcha site for the deployed hostname, set its public sitekey in `NEXT_PUBLIC_HCAPTCHA_SITEKEY`, and enable hCaptcha in **Supabase Authentication → Bot and Abuse Protection** with the matching secret. Keep the secret in Supabase's server configuration. Rebuild the application with `NEXT_PUBLIC_LOCAL_DEMO=false`; the application refuses the official test sitekey in that mode. Never deploy the local test CAPTCHA configuration as production protection.
+
+See [Supabase's CAPTCHA guide](https://supabase.com/docs/guides/auth/auth-captcha) and [hCaptcha's test-key documentation](https://docs.hcaptcha.com/#integration-testing-test-keys).
 
 To refresh the named demo fixtures with upcoming shift dates:
 
@@ -245,6 +264,8 @@ With that application and local Supabase running, use a second terminal:
 npm.cmd run test:integration
 npm.cmd run test:browser
 npm.cmd run test:themes
+npm.cmd run test:captcha
+npm.cmd run test:accounts
 ```
 
 The integration and browser checks create fictional local test data. The browser suites use an installed Chrome session and synthetic geolocation fixtures. Development and production builds use the supported Webpack option because of a reproduced Turbopack CSS-worker startup issue on the original Windows host.
@@ -253,13 +274,13 @@ The integration and browser checks create fictional local test data. The browser
 
 | Working in this release                                     | Planned / deferred                                           |
 | ----------------------------------------------------------- | ------------------------------------------------------------ |
-| Search, nearby discovery, profiles, and company management  | AI conversations, skill extraction, and match explanations   |
+| Search, nearby discovery, profiles, and company management  | Live AI quality acceptance after API credits are available   |
 | Shift publishing, applications, and capacity-safe approvals | Notifications and map pins                                   |
 | Trilingual interface and light/dark themes                  | QR attendance, worker reviews, and reliability history       |
 | Local email verification and fictional demo setup           | Identity verification, administration, and staff permissions |
 | Wage display and transport subtraction                      | Payments, commissions, and earnings accounting               |
 
-**AI status:** no inference model or provider is connected. The assistant screen explains this state and links to ordinary job search. `/api/ai/chat` and `/api/ai/extract-skills` return HTTP `503` with `AI_NOT_CONFIGURED`. Skill editing is manual.
+**AI status:** signed-in conversational job search and worker skill extraction now call OpenAI. Search results use available database listings; extraction suggests editable skills without saving the profile. A real provider request returned `credit_balance_exhausted`, shown as `AI_QUOTA_EXCEEDED`. Live AI quality remains unverified. See [configuration, boundaries and tests](docs/AI.md).
 
 Missing-information flags are deterministic checks. They do not verify employers, detect fraud, or guarantee wages. Company ratings are outside the current scope.
 
@@ -267,7 +288,7 @@ Missing-information flags are deterministic checks. They do not verify employers
 
 Public hosting has not been configured. A pilot needs a separate Supabase project, production email and redirect settings, hosting environment variables, and `NEXT_PUBLIC_LOCAL_DEMO=false`. Local seed/test scripts intentionally reject remote Supabase targets.
 
-Remaining work includes shared rate limiting for multi-instance hosting, operational monitoring, account erasure tooling, native-speaker translation review, and a production security review. External email delivery, actual hiring, payments, and AI inference have not been validated.
+Remaining work includes shared rate limiting for multi-instance hosting, operational monitoring, account erasure tooling, native-speaker translation review, and a production security review. External email delivery, actual hiring, payments, and successful live AI inference have not been validated.
 
 ## Project documentation
 

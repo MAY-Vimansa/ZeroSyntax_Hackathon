@@ -1,6 +1,118 @@
 export type Locale = "en" | "si" | "ta";
 // Each entry is English, Sinhala, Tamil. Listing content remains in its original language.
 export const messages = {
+  captchaForResend: [
+    "Complete this checkbox only if you need a new verification email.",
+    "නව තහවුරු කිරීමේ ඊමේල් අවශ්‍ය නම් පමණක් මෙය සලකුණු කරන්න.",
+    "புதிய உறுதிப்படுத்தல் மின்னஞ்சல் தேவைப்பட்டால் மட்டும் தேர்வுப்பெட்டியை நிறைவு செய்யவும்.",
+  ],
+  verifyHeading: [
+    "Verify your email",
+    "ඔබේ ඊමේල් තහවුරු කරන්න",
+    "உங்கள் மின்னஞ்சலை உறுதிப்படுத்தவும்",
+  ],
+  emailUnconfirmed: [
+    "Your account exists, but your email has not been verified. Open the verification message below, then log in.",
+    "ඔබේ ගිණුම සාදා ඇත. ඊමේල් තහවුරු කර පසුව පිවිසෙන්න.",
+    "உங்கள் கணக்கு உள்ளது. மின்னஞ்சலை உறுதிப்படுத்திய பின் உள்நுழையவும்.",
+  ],
+  localVerification: [
+    "This is a local demo. Verification messages are captured in the local inbox and are NOT sent to Gmail or Outlook. Open the inbox and select the newest message for your email address.",
+    "මෙය දේශීය ආදර්ශයකි. තහවුරු කිරීමේ ඊමේල් Gmail හෝ Outlook වෙත නොයවයි. දේශීය පෙට්ටියේ ඔබේ ලිපිනයට ඇති නවතම පණිවිඩය විවෘත කරන්න.",
+    "இது உள்ளூர் மாதிரி. உறுதிப்படுத்தல் மின்னஞ்சல்கள் Gmail அல்லது Outlook-க்கு அனுப்பப்படாது. உள்ளூர் பெட்டியில் உங்கள் முகவரிக்கான புதிய செய்தியைத் திறக்கவும்.",
+  ],
+  resendVerification: [
+    "Resend verification email",
+    "තහවුරු කිරීමේ ඊමේල් නැවත යවන්න",
+    "உறுதிப்படுத்தல் மின்னஞ்சலை மீண்டும் அனுப்பு",
+  ],
+  verificationResent: [
+    "Verification message requested. Check the newest email; older links may no longer work.",
+    "නවතම ඊමේල් පරීක්ෂා කරන්න. පැරණි සබැඳි ක්‍රියා නොකරනු ඇත.",
+    "புதிய மின்னஞ்சலைப் பார்க்கவும். பழைய இணைப்புகள் செயல்படாமல் இருக்கலாம்.",
+  ],
+  verifiedLogin: [
+    "I’ve verified — log in",
+    "තහවුරු කළා — පිවිසෙන්න",
+    "உறுதிப்படுத்திவிட்டேன் — உள்நுழை",
+  ],
+  differentEmail: [
+    "Use a different email",
+    "වෙනත් ඊමේල් භාවිත කරන්න",
+    "வேறு மின்னஞ்சலைப் பயன்படுத்து",
+  ],
+  verificationSignIn: [
+    "Please log in to finish. If your email is still unconfirmed, you can request another verification message here.",
+    "අවසන් කිරීමට පිවිසෙන්න. ඊමේල් තහවුරු කර නැත්නම් නව පණිවිඩයක් ඉල්ලන්න.",
+    "முடிக்க உள்நுழையவும். மின்னஞ்சல் உறுதியாகவில்லை என்றால் புதிய செய்தியைக் கோரலாம்.",
+  ],
+  authRateLimited: [
+    "Too many requests. Wait a minute before trying again.",
+    "ඉල්ලීම් වැඩියි. විනාඩියකට පසු නැවත උත්සාහ කරන්න.",
+    "கோரிக்கைகள் அதிகம். ஒரு நிமிடத்திற்குப் பின் முயற்சிக்கவும்.",
+  ],
+  accountExists: [
+    "This account is already registered. Log in, or complete email verification if it is pending.",
+    "මෙම ගිණුම දැනටමත් ඇත. පිවිසෙන්න හෝ ඊමේල් තහවුරු කරන්න.",
+    "இந்தக் கணக்கு ஏற்கனவே உள்ளது. உள்நுழையவும் அல்லது மின்னஞ்சலை உறுதிப்படுத்தவும்.",
+  ],
+  invalidEmail: [
+    "Enter a valid email address.",
+    "වලංගු ඊමේල් ලිපිනයක් ඇතුළත් කරන්න.",
+    "சரியான மின்னஞ்சல் முகவரியை உள்ளிடவும்.",
+  ],
+  invalidCredentials: [
+    "The email or password is incorrect. Please try again.",
+    "ඊමේල් හෝ මුරපදය වැරදියි. නැවත උත්සාහ කරන්න.",
+    "மின்னஞ்சல் அல்லது கடவுச்சொல் தவறானது. மீண்டும் முயற்சிக்கவும்.",
+  ],
+  authUnavailable: [
+    "Cannot reach the account service. Please try again shortly.",
+    "ගිණුම් සේවාවට සම්බන්ධ විය නොහැක. පසුව නැවත උත්සාහ කරන්න.",
+    "கணக்கு சேவையை அணுக முடியவில்லை. சிறிது நேரத்தில் மீண்டும் முயற்சிக்கவும்.",
+  ],
+  signupUnavailable: [
+    "Account registration is currently unavailable.",
+    "ගිණුම් ලියාපදිංචිය දැනට ලබාගත නොහැක.",
+    "கணக்குப் பதிவு தற்போது கிடைக்கவில்லை.",
+  ],
+  captchaLabel: ["I’m not a robot", "මම රොබෝවෙක් නොවෙමි", "நான் ரோபோ அல்ல"],
+  captchaRequired: [
+    "Complete the checkbox below to continue.",
+    "ඉදිරියට යාමට පහත සලකුණු කොටුව සම්පූර්ණ කරන්න.",
+    "தொடர கீழே உள்ள தேர்வுப்பெட்டியை நிறைவு செய்யவும்.",
+  ],
+  captchaExpired: [
+    "Verification expired. Please complete the checkbox again.",
+    "තහවුරු කිරීම කල් ඉකුත් විය. කරුණාකර නැවත සලකුණු කොටුව සම්පූර්ණ කරන්න.",
+    "சரிபார்ப்பு காலாவதியானது. தேர்வுப்பெட்டியை மீண்டும் நிறைவு செய்யவும்.",
+  ],
+  captchaFailed: [
+    "Verification failed or could not load. Please try the checkbox again or reload the page.",
+    "තහවුරු කිරීම අසාර්ථක විය හෝ පූරණය කළ නොහැක. නැවත උත්සාහ කරන්න හෝ පිටුව යළි පූරණය කරන්න.",
+    "சரிபார்ப்பு தோல்வியடைந்தது அல்லது ஏற்ற முடியவில்லை. மீண்டும் முயற்சிக்கவும் அல்லது பக்கத்தை மீளேற்றவும்.",
+  ],
+  captchaUnavailable: [
+    "Verification is unavailable. Please contact support or try again later.",
+    "තහවුරු කිරීම ලබා ගත නොහැක. සහාය අමතන්න හෝ පසුව උත්සාහ කරන්න.",
+    "சரிபார்ப்பு கிடைக்கவில்லை. உதவியைத் தொடர்பு கொள்ளவும் அல்லது பின்னர் முயற்சிக்கவும்.",
+  ],
+  captchaTestMode: [
+    "hCaptcha is for testing only.",
+    "hCaptcha පරීක්ෂා කිරීම සඳහා පමණි.",
+    "hCaptcha சோதனைக்கு மட்டுமே.",
+  ],
+  captchaTestContact: [
+    "No bot protection is active. If you see this on a live site, please contact the site administrator.",
+    "බොට් ආරක්ෂාව සක්‍රිය නැත. මෙය සජීවී වෙබ් අඩවියක දිස්වන්නේ නම්, කරුණාකර අඩවි පරිපාලක අමතන්න.",
+    "போட் பாதுகாப்பு செயலில் இல்லை. இதை நேரடி இணையதளத்தில் கண்டால், தள நிர்வாகியைத் தொடர்பு கொள்ளவும்.",
+  ],
+  captchaDisclosure: [
+    "This site uses hCaptcha.",
+    "මෙම අඩවිය hCaptcha භාවිත කරයි.",
+    "இந்தத் தளம் hCaptcha-ஐப் பயன்படுத்துகிறது.",
+  ],
+  captchaTerms: ["Terms of Service", "සේවා කොන්දේසි", "சேவை விதிமுறைகள்"],
   companiesCount: [
     "Companies hiring",
     "බඳවාගන්නා සමාගම්",
@@ -388,6 +500,7 @@ export const messages = {
     "உங்களைப் பற்றிய தகவல்கள் முதலாளிகளுக்கு உங்கள் அனுபவத்தைப் புரிய உதவும்.",
   ],
   companyName: ["Company name", "සමාගමේ නම", "நிறுவனப் பெயர்"],
+  companyAddress: ["Company address", "සමාගමේ ලිපිනය", "நிறுவன முகவரி"],
   description: ["Description", "විස්තරය", "விளக்கம்"],
   contact: [
     "Public contact email",
@@ -521,9 +634,9 @@ export const messages = {
   ],
   privacy: ["Privacy", "පෞද්ගලිකත්වය", "தனியுரிமை"],
   privacyBody: [
-    "Location is optional and used only when you request nearby search. Precise location is not saved to your profile. Profile skills and applications are shared with the employer for the shifts you apply to. No AI provider currently receives your data.",
-    "ස්ථානය අත්‍යවශ්‍ය නොවේ. ඔබ ඉල්ලන ළඟම සෙවීම් සඳහා පමණක් එය භාවිත වේ. එය පැතිකඩේ සුරැකෙන්නේ නැත. අයදුම් කරන රැකියාවල සේවායෝජකයන්ට කුසලතා හා අයදුම්පත් පෙනේ. දැනට AI සේවාවකට දත්ත නොයවයි.",
-    "இருப்பிடம் விருப்பமானது; நீங்கள் கோரும்போது அருகிலுள்ள தேடலுக்கு மட்டுமே பயன்படுத்தப்படும். துல்லிய இருப்பிடம் சுயவிவரத்தில் சேமிக்கப்படாது. விண்ணப்பிக்கும் வேலைகளின் முதலாளிகளுடன் திறன்களும் விண்ணப்பங்களும் பகிரப்படும். தற்போது AI சேவைக்கு தரவு அனுப்பப்படவில்லை.",
+    "Location is optional and used only for nearby search; precise coordinates are not saved to your profile or sent to OpenAI. Profile skills and applications are shared with employers for shifts you apply to. Using the AI assistant sends your message and recent conversation to OpenAI. Skill extraction sends the introduction you submit. AI suggestions do not change your saved profile until you save it.",
+    "ස්ථානය ළඟම රැකියා සෙවීමට පමණක් භාවිත වේ; පැතිකඩේ සුරැකීම හෝ OpenAI වෙත යැවීම සිදු නොවේ. අයදුම් කරන රැකියාවල සේවායෝජකයන්ට කුසලතා හා අයදුම්පත් පෙනේ. AI භාවිතයේදී පණිවිඩ සහ මෑත සංවාදය OpenAI වෙත යවයි. කුසලතා ලබා ගැනීමේදී ඔබ යවන හැඳින්වීම භාවිත කරයි. යෝජනා තබා ගැනීමට පැතිකඩ සුරකින්න.",
+    "இருப்பிடம் அருகிலுள்ள வேலை தேடலுக்கு மட்டுமே பயன்படும்; விவரத்தில் சேமிக்கப்படவோ OpenAI க்கு அனுப்பப்படவோ மாட்டாது. விண்ணப்பிக்கும் வேலைகளின் முதலாளிகளுடன் திறன்களும் விண்ணப்பங்களும் பகிரப்படும். AI உதவியாளரைப் பயன்படுத்தும்போது செய்திகள் மற்றும் சமீபத்திய உரையாடல் OpenAI க்கு அனுப்பப்படும். திறன் பிரித்தெடுத்தலுக்கு நீங்கள் அனுப்பும் அறிமுகம் பயன்படும். பரிந்துரைகளை வைத்திருக்க விவரத்தைச் சேமிக்கவும்.",
   ],
   light: ["Light theme", "ලා පැහැ තේමාව", "ஒளி தோற்றம்"],
   dark: ["Dark theme", "අඳුරු තේමාව", "இருள் தோற்றம்"],
@@ -585,6 +698,30 @@ export const messages = {
     "ඔබේ පැතිකඩ, ඔබේ ඊළඟ අවස්ථාව.",
     "உங்கள் விவரம், உங்கள் அடுத்த வாய்ப்பு.",
   ],
+  aiHeading: ["Find your next shift with AI", "AI සමඟ ඔබේ ඊළඟ වැඩ මුරය සොයන්න", "AI மூலம் உங்கள் அடுத்த வேலையைக் கண்டறியுங்கள்"],
+  aiIntro: ["Tell us the work, place, pay and date you want. Results come from available listings.", "ඔබට අවශ්‍ය රැකියාව, ස්ථානය, වැටුප සහ දිනය කියන්න. ප්‍රතිඵල පවතින දැන්වීම් වලින් ලැබේ.", "வேலை, இடம், ஊதியம் மற்றும் தேதியைக் கூறுங்கள். உள்ள வேலைப் பட்டியல்களிலிருந்து முடிவுகள் கிடைக்கும்."],
+  aiReady: ["AI connected", "AI සම්බන්ධයි", "AI இணைக்கப்பட்டுள்ளது"],
+  aiNeedsCredits: ["AI needs credits", "AI සඳහා ණය අවශ්‍යයි", "AI க்கு வரவு தேவை"],
+  aiConfigured: ["AI configured", "AI සකසා ඇත", "AI அமைக்கப்பட்டுள்ளது"],
+  aiPrivacy: ["Your messages and recent conversation are sent to OpenAI when you submit. Location stays with our job search and is used only when you ask for nearby work. AI cannot apply or make hiring decisions.", "ඔබ යවන පණිවිඩ සහ මෑත සංවාදය OpenAI වෙත යවනු ලැබේ. ස්ථානය ළඟම රැකියා සෙවීමට පමණක් භාවිත වේ. AI අයදුම් කිරීම හෝ බඳවා ගැනීම සිදු නොකරයි.", "அனுப்பும்போது உங்கள் செய்திகள் மற்றும் சமீபத்திய உரையாடல் OpenAI க்கு அனுப்பப்படும். அருகிலுள்ள வேலை தேடலுக்கு மட்டுமே இருப்பிடம் பயன்படும். AI விண்ணப்பிக்கவோ பணியமர்த்தவோ முடியாது."],
+  aiSignIn: ["Sign in to use the AI assistant.", "AI සහායකයා භාවිත කිරීමට ඇතුළු වන්න.", "AI உதவியாளரைப் பயன்படுத்த உள்நுழையவும்."],
+  aiWelcome: ["What kind of shift are you looking for?", "ඔබ සොයන්නේ කුමන වැඩ මුරයක්ද?", "எந்த வகையான வேலையைத் தேடுகிறீர்கள்?"],
+  aiExample: ["Find packing jobs in Colombo paying at least Rs. 3,000.", "කොළඹ රු. 3,000 කට වැඩි වැටුපක් සහිත ඇසුරුම් රැකියා සොයන්න.", "கொழும்பில் குறைந்தது ரூ. 3,000 ஊதியம் தரும் பொதி வேலைகளைக் கண்டறியுங்கள்."],
+  aiYou: ["You", "ඔබ", "நீங்கள்"],
+  aiAsk: ["Describe the work you want", "ඔබට අවශ්‍ය රැකියාව විස්තර කරන්න", "நீங்கள் விரும்பும் வேலையை விவரிக்கவும்"],
+  aiSend: ["Send", "යවන්න", "அனுப்பு"],
+  aiThinking: ["Understanding your request and checking available jobs…", "ඔබේ ඉල්ලීම තේරුම් ගෙන රැකියා පරීක්ෂා කරමින්…", "உங்கள் கோரிக்கையைப் புரிந்துகொண்டு வேலைகளைச் சரிபார்க்கிறது…"],
+  aiMatchingSkills: ["Matching skills", "ගැළපෙන කුසලතා", "பொருந்தும் திறன்கள்"],
+  aiMissing: ["AI is not configured. You can still use job search.", "AI සකසා නැත. රැකියා සෙවීම භාවිත කළ හැක.", "AI அமைக்கப்படவில்லை. வேலை தேடலைப் பயன்படுத்தலாம்."],
+  aiAuthError: ["The AI connection needs a valid API key. Job search is still available.", "AI සම්බන්ධතාවයට වලංගු API යතුරක් අවශ්‍යය. රැකියා සෙවීම ක්‍රියාත්මකයි.", "AI இணைப்புக்கு செல்லுபடியாகும் API விசை தேவை. வேலை தேடல் கிடைக்கிறது."],
+  aiQuotaError: ["The AI provider has no available quota or credits. Job search is still available.", "AI සේවාවේ ණය හෝ කෝටාව අවසන්. රැකියා සෙවීම ක්‍රියාත්මකයි.", "AI சேவையின் ஒதுக்கீடு அல்லது வரவு தீர்ந்துவிட்டது. வேலை தேடல் கிடைக்கிறது."],
+  aiModelError: ["The configured AI model is unavailable. Job search is still available.", "සැකසූ AI මාදිලිය ලබාගත නොහැක. රැකියා සෙවීම ක්‍රියාත්මකයි.", "அமைக்கப்பட்ட AI மாதிரி கிடைக்கவில்லை. வேலை தேடல் கிடைக்கிறது."],
+  aiUnavailable: ["AI could not complete this request. Try again or use job search.", "AI ඉල්ලීම සම්පූර්ණ කළ නොහැක. නැවත උත්සාහ කරන්න හෝ රැකියා සෙවීම භාවිත කරන්න.", "AI கோரிக்கையை முடிக்கவில்லை. மீண்டும் முயற்சிக்கவும் அல்லது வேலை தேடலைப் பயன்படுத்தவும்."],
+  aiExtract: ["Extract skills with AI", "AI මගින් කුසලතා ලබාගන්න", "AI மூலம் திறன்களைப் பிரித்தெடுக்கவும்"],
+  aiSkillNotice: ["This sends your introduction to OpenAI and adds suggested skills to this form. Save your profile to keep them.", "මෙය ඔබේ හැඳින්වීම OpenAI වෙත යවා යෝජිත කුසලතා පෝරමයට එක් කරයි. තබා ගැනීමට පැතිකඩ සුරකින්න.", "இது உங்கள் அறிமுகத்தை OpenAI க்கு அனுப்பி பரிந்துரைத்த திறன்களைப் படிவத்தில் சேர்க்கும். வைத்திருக்க விவரத்தைச் சேமிக்கவும்."],
+  aiSkillsAdded: ["Skills added to the form", "පෝරමයට එක් කළ කුසලතා", "படிவத்தில் சேர்க்கப்பட்ட திறன்கள்"],
+  aiNoSkills: ["No work skills were found in that introduction.", "මෙම හැඳින්වීමේ රැකියා කුසලතා හමු නොවීය.", "அந்த அறிமுகத்தில் வேலைத் திறன்கள் கிடைக்கவில்லை."],
+  aiProfileSave: ["Changes are saved only when you save your profile.", "වෙනස්කම් තබා ගැනීමට පැතිකඩ සුරකින්න.", "விவரத்தைச் சேமிக்கும்போது மட்டுமே மாற்றங்கள் சேமிக்கப்படும்."],
 } satisfies Record<string, [string, string, string]>;
 export type MessageKey = keyof typeof messages;
 export const locales: Locale[] = ["en", "si", "ta"];

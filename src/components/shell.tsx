@@ -31,6 +31,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const path = usePathname();
   const router = useRouter();
   const employer = path.startsWith("/employer");
+  if (path === "/admin" || path.startsWith("/admin/")) return <>{children}</>;
   const publicLinks: [string, MessageKey][] =
     profile?.role === "WORKER"
       ? [
@@ -109,7 +110,11 @@ export function Shell({ children }: { children: ReactNode }) {
               <Link
                 className="button small secondary account-link"
                 href={
-                  profile.role === "EMPLOYER" ? "/employer" : "/applications"
+                  profile.role === "ADMIN"
+                    ? "/admin"
+                    : profile.role === "EMPLOYER"
+                      ? "/employer"
+                      : "/applications"
                 }
               >
                 <span className="avatar-mini">

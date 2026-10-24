@@ -2,6 +2,7 @@ import { chromium, expect as baseExpect } from "@playwright/test";
 import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 import { mkdir, writeFile } from "node:fs/promises";
+import { completeTestCaptcha } from "./captcha-test-helpers.mjs";
 config({ path: ".env.local", quiet: true });
 const expect = baseExpect.configure({ timeout: 20000 });
 const base = process.env.TEST_APP_URL ?? "http://127.0.0.1:3000";
@@ -46,6 +47,7 @@ async function login(page, email) {
   await page.goto(`${base}/login`);
   await page.getByLabel("Email address").fill(email);
   await page.getByLabel("Password", { exact: true }).fill("FlexiRova!2026");
+  await completeTestCaptcha(page);
   await page.getByRole("button", { name: "Log in", exact: true }).click();
   await page.waitForURL((url) => !url.pathname.includes("/login"));
 }
@@ -101,10 +103,10 @@ try {
     pass("user-entered travel calculation");
     await page.goto(`${base}/assistant`);
     await expect(
-      page.getByText("AI not configured", { exact: true }),
+      page.getByText("Sign in to use the AI assistant.", { exact: true }),
     ).toBeVisible();
     await expect(page.locator("textarea")).toHaveCount(0);
-    pass("assistant clearly unavailable and contains no fake chat");
+    pass("assistant requires sign-in before paid AI requests");
     const mobile = await pageFor({ width: 390, height: 844 });
     await mobile.page.goto(base);
     await expect(
@@ -301,6 +303,7 @@ try {
     .fill("Fictional Signup Worker");
   await page.getByLabel("Email address", { exact: true }).fill(signupEmail);
   await page.getByLabel("Password", { exact: true }).fill("FlexiRova!2026");
+  await completeTestCaptcha(page);
   await page
     .getByRole("button", { name: "Create your account", exact: true })
     .click();

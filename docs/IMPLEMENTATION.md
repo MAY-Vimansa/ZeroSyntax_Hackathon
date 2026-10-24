@@ -1,5 +1,7 @@
 # Implementation checklist
 
+Update 2026-10-24: OpenAI integration is now implemented; the initial no-AI milestone below is historical. See AI.md for the current routes, boundaries, tests and exhausted-credit blocker.
+
 - [x] Confirm official hackathon window. AI integration deferred by user.
 - [x] Inspect environment; start isolated local Supabase. No AI runtime dependency.
 - [x] Database, RLS, transactional applications, authentication.

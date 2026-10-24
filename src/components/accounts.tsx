@@ -1,7 +1,15 @@
 "use client";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, type ReactNode, type FormEvent } from "react";
+import {
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+  type FormEvent,
+} from "react";
+import { AuthCaptcha } from "./captcha";
+import { SkillExtractor } from "./assistant";
+import { captchaSitekey } from "@/lib/captcha";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {
@@ -17,6 +25,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { browserDb } from "@/lib/supabase/client";
+import { authErrorMessage, authDestination } from "@/lib/auth";
 import { api, useApp } from "./provider";
 import {
   Loading,
@@ -54,9 +63,27 @@ export function Protected({
   return <>{children}</>;
 }
 type AuthValues = { email: string; password: string; display_name: string };
+const sitekey = captchaSitekey(
+  process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY,
+  process.env.NEXT_PUBLIC_LOCAL_DEMO,
+);
+function subscribeCompactCaptcha(callback: () => void) {
+  const query = window.matchMedia("(max-width: 420px)");
+  query.addEventListener("change", callback);
+  return () => query.removeEventListener("change", callback);
+}
+const compactCaptcha = () => window.matchMedia("(max-width: 420px)").matches;
+const serverCompactCaptcha = () => false;
 export function Auth({ signup = false }: { signup?: boolean }) {
   const hydrated = useHydrated();
-  const { t, refreshProfile } = useApp();
+  const { t, refreshProfile, theme, locale } = useApp();
+  const compact = useSyncExternalStore(
+    subscribeCompactCaptcha,
+    compactCaptcha,
+    serverCompactCaptcha,
+  );
+  const [captcha, setCaptcha] = useState({ token: "", context: "" });
+  const [captchaAttempt, setCaptchaAttempt] = useState(0);
   const params = useSearchParams();
   const [role, setRole] = useState(
     params.get("role") === "EMPLOYER" ? "EMPLOYER" : "WORKER",
@@ -64,48 +91,104 @@ export function Auth({ signup = false }: { signup?: boolean }) {
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState(""),
     [failed, setFailed] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
   const router = useRouter();
-  const { register, handleSubmit } = useForm<AuthValues>();
+  const { register, handleSubmit, resetField } = useForm<AuthValues>();
+  // A token belongs to one form, role, theme, language, size, and submission.
+  const captchaContext = `${signup}:${role}:${theme}:${locale}:${compact}:${captchaAttempt}`;
+  const verified =
+    !!sitekey && !!captcha.token && captcha.context === captchaContext;
+  async function finishLogin() {
+    const profile = await api<Profile>("/api/me");
+    await refreshProfile();
+    router.push(authDestination(profile.role, params.get("next")));
+  }
+  async function resend() {
+    if (!pendingEmail) return;
+    if (!verified) {
+      setFailed(true);
+      setMessage(t(sitekey ? "captchaRequired" : "captchaUnavailable"));
+      return;
+    }
+    setBusy(true);
+    setResending(true);
+    setMessage("");
+    setFailed(false);
+    try {
+      const { error } = await browserDb().auth.resend({
+        type: "signup",
+        email: pendingEmail,
+        options: {
+          captchaToken: captcha.token,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) throw error;
+      setMessage(t("verificationResent"));
+    } catch (error) {
+      setFailed(true);
+      setMessage(t(authErrorMessage(error)));
+    } finally {
+      setCaptcha({ token: "", context: "" });
+      setCaptchaAttempt((a) => a + 1);
+      setResending(false);
+      setBusy(false);
+    }
+  }
   async function submit(values: AuthValues) {
+    if (!verified) {
+      setFailed(true);
+      setMessage(t(sitekey ? "captchaRequired" : "captchaUnavailable"));
+      return;
+    }
     setBusy(true);
     setMessage("");
     setFailed(false);
     try {
       const client = browserDb();
+      const email = values.email.trim().toLowerCase();
       if (signup) {
-        const { error } = await client.auth.signUp({
-          email: values.email,
+        if (values.display_name.trim().length < 2) {
+          setFailed(true);
+          setMessage(t("required"));
+          return;
+        }
+        const { data, error } = await client.auth.signUp({
+          email,
           password: values.password,
           options: {
-            data: { display_name: values.display_name, role },
+            captchaToken: captcha.token,
+            data: { display_name: values.display_name.trim(), role },
             emailRedirectTo: `${window.location.origin}/auth/callback`,
           },
         });
         if (error) throw error;
+        if (data.session) {
+          await finishLogin();
+          return;
+        }
+        setPendingEmail(email);
+        resetField("password");
         setMessage(t("verifyEmail"));
       } else {
         const { error } = await client.auth.signInWithPassword({
-          email: values.email,
+          email,
           password: values.password,
+          options: { captchaToken: captcha.token },
         });
-        if (error) throw error;
-        await refreshProfile();
-        const {
-          data: { user },
-        } = await client.auth.getUser();
-        const next = params.get("next");
-        router.push(
-          next?.startsWith("/") && !next.startsWith("//")
-            ? next
-            : user?.user_metadata?.role === "EMPLOYER"
-              ? "/employer"
-              : "/applications",
-        );
+        if (error) {
+          if (error.code === "email_not_confirmed") setPendingEmail(email);
+          throw error;
+        }
+        await finishLogin();
       }
-    } catch {
+    } catch (error) {
       setFailed(true);
-      setMessage(t("authError"));
+      setMessage(t(authErrorMessage(error)));
     } finally {
+      setCaptcha({ token: "", context: "" });
+      setCaptchaAttempt((attempt) => attempt + 1);
       setBusy(false);
     }
   }
@@ -142,12 +225,82 @@ export function Auth({ signup = false }: { signup?: boolean }) {
             <p className="muted">{t("loginBody")}</p>
           </div>
         </div>
-        {signup && (
+        {(params.get("verification") === "sign-in" ||
+          params.get("error") === "verification") &&
+          !message && (
+            <p role="status" className="notice">
+              {t("verificationSignIn")}
+            </p>
+          )}
+        {pendingEmail && (
+          <section
+            className="verification-panel"
+            aria-labelledby="verify-heading"
+          >
+            <span className="step-icon">
+              <Mail size={23} />
+            </span>
+            <h3 id="verify-heading">{t("verifyHeading")}</h3>
+            <p className="verification-address">{pendingEmail}</p>
+            <p className="muted">
+              {process.env.NEXT_PUBLIC_LOCAL_DEMO === "true"
+                ? t("localVerification")
+                : t("verifyEmail")}
+            </p>
+            {process.env.NEXT_PUBLIC_LOCAL_DEMO === "true" && (
+              <a
+                className="button"
+                href="http://127.0.0.1:55324"
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t("inbox")}
+                <ArrowUpRight size={17} />
+              </a>
+            )}
+            {!signup && (
+              <button
+                type="button"
+                className="button secondary"
+                onClick={resend}
+                disabled={busy || !verified}
+              >
+                {t(resending ? "loading" : "resendVerification")}
+              </button>
+            )}
+            {signup && (
+              <>
+                <Link className="text-link" href="/login">
+                  {t("verifiedLogin")}
+                  <ArrowRight size={16} />
+                </Link>
+                <button
+                  type="button"
+                  className="text-button"
+                  onClick={() => {
+                    setPendingEmail(null);
+                    setMessage("");
+                    setFailed(false);
+                    setCaptcha({ token: "", context: "" });
+                    setCaptchaAttempt((a) => a + 1);
+                  }}
+                >
+                  {t("differentEmail")}
+                </button>
+              </>
+            )}
+          </section>
+        )}
+        {signup && !pendingEmail && (
           <div className="role-picker">
             <button
               type="button"
               className={role === "WORKER" ? "selected" : ""}
-              onClick={() => setRole("WORKER")}
+              disabled={busy}
+              onClick={() => {
+                setCaptcha({ token: "", context: "" });
+                setRole("WORKER");
+              }}
             >
               <BriefcaseBusiness size={21} />
               {t("worker")}
@@ -155,62 +308,155 @@ export function Auth({ signup = false }: { signup?: boolean }) {
             <button
               type="button"
               className={role === "EMPLOYER" ? "selected" : ""}
-              onClick={() => setRole("EMPLOYER")}
+              disabled={busy}
+              onClick={() => {
+                setCaptcha({ token: "", context: "" });
+                setRole("EMPLOYER");
+              }}
             >
               <Building2 size={21} />
               {t("employer")}
             </button>
           </div>
         )}
-        <form method="post" onSubmit={handleSubmit(submit)}>
-          {signup && (
-            <label>
-              {t("name")}
-              <input
-                {...register("display_name")}
-                disabled={!hydrated || busy}
-                required
-                minLength={2}
-                maxLength={100}
-                autoComplete="name"
-              />
-            </label>
+        <form
+          method="post"
+          onSubmit={
+            signup && pendingEmail
+              ? (event) => {
+                  event.preventDefault();
+                  void resend();
+                }
+              : handleSubmit(submit)
+          }
+        >
+          {(!signup || !pendingEmail) && (
+            <>
+              {signup && (
+                <label>
+                  {t("name")}
+                  <input
+                    {...register("display_name")}
+                    disabled={!hydrated || busy}
+                    required
+                    minLength={2}
+                    maxLength={100}
+                    autoComplete="name"
+                  />
+                </label>
+              )}
+              <label>
+                {t("email")}
+                <input
+                  {...register("email", {
+                    onChange: () => {
+                      setPendingEmail(null);
+                      setMessage("");
+                      setFailed(false);
+                    },
+                  })}
+                  disabled={!hydrated || busy}
+                  type="email"
+                  required
+                  autoComplete="email"
+                />
+              </label>
+              <label>
+                {t("password")}
+                <input
+                  {...register("password")}
+                  disabled={!hydrated || busy}
+                  aria-label={t("password")}
+                  aria-describedby={signup ? "password-help" : undefined}
+                  type="password"
+                  required
+                  minLength={8}
+                  maxLength={128}
+                  autoComplete={signup ? "new-password" : "current-password"}
+                />
+                {signup && (
+                  <small id="password-help">{t("passwordHelp")}</small>
+                )}
+              </label>
+            </>
           )}
-          <label>
-            {t("email")}
-            <input
-              {...register("email")}
-              disabled={!hydrated || busy}
-              type="email"
-              required
-              autoComplete="email"
-            />
-          </label>
-          <label>
-            {t("password")}
-            <input
-              {...register("password")}
-              disabled={!hydrated || busy}
-              aria-label={t("password")}
-              aria-describedby={signup ? "password-help" : undefined}
-              type="password"
-              required
-              minLength={8}
-              maxLength={128}
-              autoComplete={signup ? "new-password" : "current-password"}
-            />
-            {signup && <small id="password-help">{t("passwordHelp")}</small>}
-          </label>
+          <div
+            className="auth-captcha"
+            role="group"
+            aria-label={t("captchaLabel")}
+          >
+            {sitekey ? (
+              <>
+                <p className="muted small-text" id="captcha-help">
+                  {t(
+                    signup && pendingEmail
+                      ? "captchaForResend"
+                      : "captchaRequired",
+                  )}
+                </p>
+                {hydrated && (
+                  <AuthCaptcha
+                    key={captchaContext}
+                    verified={verified}
+                    disabled={busy}
+                    onClear={() => setCaptcha({ token: "", context: "" })}
+                    sitekey={sitekey}
+                    theme={theme}
+                    languageOverride={locale}
+                    size={compact ? "compact" : "normal"}
+                    reCaptchaCompat={false}
+                    onLoad={() => setCaptcha({ token: "", context: "" })}
+                    onVerify={(token) => {
+                      setCaptcha({ token, context: captchaContext });
+                      setMessage("");
+                    }}
+                    onExpire={() => {
+                      setCaptcha({ token: "", context: "" });
+                      setFailed(true);
+                      setMessage(t("captchaExpired"));
+                    }}
+                    onChalExpired={() => {
+                      setCaptcha({ token: "", context: "" });
+                      setFailed(true);
+                      setMessage(t("captchaExpired"));
+                    }}
+                    onError={() => {
+                      setCaptcha({ token: "", context: "" });
+                      setFailed(true);
+                      setMessage(t("captchaFailed"));
+                    }}
+                  />
+                )}
+              </>
+            ) : (
+              <p className="form-error" role="alert">
+                {t("captchaUnavailable")}
+              </p>
+            )}
+          </div>
           {message && (
             <p
-              role="status"
+              role={failed ? "alert" : "status"}
               className={failed ? "form-error" : "notice success-notice"}
             >
               {message}
             </p>
           )}
-          <button className="button" type="submit" disabled={busy || !hydrated}>
-            {t(busy ? "loading" : signup ? "create" : "login")}
+          <button
+            className="button"
+            type="submit"
+            aria-describedby="captcha-help"
+            disabled={busy || !hydrated || !verified}
+          >
+            {t(
+              busy
+                ? "loading"
+                : signup
+                  ? pendingEmail
+                    ? "resendVerification"
+                    : "create"
+                  : "login",
+            )}
             <ArrowRight size={18} />
           </button>
         </form>
@@ -220,7 +466,7 @@ export function Auth({ signup = false }: { signup?: boolean }) {
             {t(signup ? "login" : "register")}
           </Link>
         </p>
-        {signup && (
+        {signup && !pendingEmail && (
           <p className="notice small-text">
             <Mail size={16} />
             {t("emailLocal")}{" "}
@@ -270,6 +516,8 @@ export function ProfilePage() {
 function ProfileForm({ profile }: { profile: Profile }) {
   const { t, refreshProfile, report } = useApp();
   const [busy, setBusy] = useState(false);
+  const [bio, setBio] = useState(profile.bio);
+  const [skills, setSkills] = useState(profile.skills.join(", "));
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setBusy(true);
@@ -335,7 +583,8 @@ function ProfileForm({ profile }: { profile: Profile }) {
           {t("bio")}
           <textarea
             name="bio"
-            defaultValue={profile.bio}
+            value={bio}
+            onChange={(event) => setBio(event.target.value)}
             maxLength={2000}
             rows={4}
           />
@@ -344,16 +593,18 @@ function ProfileForm({ profile }: { profile: Profile }) {
           {t("skills")}
           <input
             name="skills"
-            defaultValue={profile.skills.join(", ")}
+            value={skills}
+            onChange={(event) => setSkills(event.target.value)}
             maxLength={1800}
           />
           <small>{t("skillsHelp")}</small>
         </label>
+        {profile.role === "WORKER" && <SkillExtractor text={bio} onSkills={(suggested) => setSkills([...new Set([...skills.split(",").map((skill) => skill.trim()).filter(Boolean), ...suggested])].slice(0, 30).join(", "))} />}
       </div>
       <div className="form-footer">
         <p className="muted small-text">
           <Info size={14} />
-          {t("aiOff")}
+          {t("aiProfileSave")}
         </p>
         <button className="button" disabled={busy}>
           {t(busy ? "loading" : "save")}
@@ -467,6 +718,16 @@ function CompanyForm({
             type="email"
             required
             defaultValue={company?.contact_email}
+          />
+        </label>
+        <label className="full-row">
+          {t("companyAddress")}
+          <textarea
+            name="address"
+            autoComplete="street-address"
+            rows={3}
+            maxLength={500}
+            defaultValue={company?.address ?? ""}
           />
         </label>
         <label>
